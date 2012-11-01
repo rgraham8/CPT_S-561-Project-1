@@ -59,10 +59,10 @@ class ROB
 			m_end = m_start;
 		}
 		
-		ROB_Entry& get_entry(const unsigned int index)
-		{
-			return m_buffer[index];
-		}
+		bool issue_instruction();
+		bool execute_instruction();
+		bool commit_instruction();
+		
 	private:
 		ROB_Entry* m_start;
 		ROB_Entry* m_end;
