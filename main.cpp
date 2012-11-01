@@ -1,9 +1,12 @@
-// This file implements Tamasulo's Algorithm with Reorder Buffer
+///////////////////////////////////////////////////////////////////////////////
+/// This file implements Tamasulo's Algorithm with Reorder Buffer
+///////////////////////////////////////////////////////////////////////////////
+
 #include <stdint.h>
 #include <iostream>
 #include <assert.h>
 
-#define ROB_SIZE 32
+#define ROB_SIZE 32 // number of entries in the Reorder buffer
 
 // List of the available instructions
 enum INSTRUCTION
@@ -23,7 +26,9 @@ enum STATE
 	COMMIT
 };
 
+///////////////////////////////////////////////////////////////////////////////
 // One entry in the ROB 
+///////////////////////////////////////////////////////////////////////////////
 class ROB_Entry
 {
 	public:
@@ -51,6 +56,10 @@ class ROB_Entry
 		static unsigned int s_next_id; // used to increment each entry number
 };
 
+///////////////////////////////////////////////////////////////////////////////
+/// The Reorder Buffer
+/// Contains a defined number of entries
+///////////////////////////////////////////////////////////////////////////////
 class ROB
 {
 	public:
@@ -94,6 +103,13 @@ class ROB
 			m_tail = m_rob_head;
 		}
 		
+		///////////////////////////////////////////////////////////////////////
+		/// Issue an instruction the to reorder buffer
+		///
+		/// @param[in] issued_instruction the instruction to add to the ROB
+		///
+		/// @returns FALSE if a slot was not available in the ROB. TRUE otherwise
+		///////////////////////////////////////////////////////////////////////
 		bool issue_instruction(INSTRUCTION issued_instruction)
 		{
 			bool issue_successful = false;
