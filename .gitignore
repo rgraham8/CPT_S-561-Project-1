@@ -10,3 +10,8 @@
 *.lai
 *.la
 *.a
+*.exe
+
+# Doxygen
+Doxyfile
+Doxygen_Output/*

@@ -1,5 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 /// This file implements Tamasulo's Algorithm with Reorder Buffer
+/// 
+/// @file main.cpp
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <stdint.h>
@@ -14,6 +16,9 @@
 ///
 /// @param[in] argc number command-line of args
 /// @param[in] argv array of command-line arguments
+///
+/// @retval 0 if no problems occured
+/// @retval 1 if an error code
 ///////////////////////////////////////////////////////////////////////////////
 int main(int argc, char* argv[])
 {
@@ -21,3 +26,4 @@ int main(int argc, char* argv[])
 	ROB reorder_buffer;
 	return 0;
 }
+

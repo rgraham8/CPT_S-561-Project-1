@@ -1,5 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 /// This file implements Tamasulo's Algorithm with Reorder Buffer
+///
+/// @file rob_buffer.hpp
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef ROB_BUFFER_H_INCLUDED
@@ -56,7 +58,7 @@ class FP_Register : public Register
 ///////////////////////////////////////////////////////////////////////////////
 // Interger register 
 ///////////////////////////////////////////////////////////////////////////////
-class Int_Register
+class Int_Register : public Register
 {
 	public:
 		bool busy;
@@ -92,12 +94,12 @@ class Instruction
 class ROB_Entry
 {
 	public:
-		bool m_busy; // whether unit is busy
-		Instruction m_instruction; // instruction being issued/executed
-		STATE m_state; // the state of the unit
-		long* m_destination; // the destination register
+		bool m_busy; ///< whether unit is busy
+		Instruction m_instruction; ///< instruction being issued/executed
+		STATE m_state; ///< the state of the unit
+		long* m_destination; ///< the destination register
 		unsigned int m_entry_number; // entry number
-		ROB_Entry* m_next; // next pointer for circular buffer
+		ROB_Entry* m_next; ///< next pointer for circular buffer
 		
 		///////////////////////////////////////////////////////////////////////
 		// Constructor
@@ -129,6 +131,11 @@ class ROB
 		ROB(void);
 		
 		///////////////////////////////////////////////////////////////////////
+		/// Destructor: Deallocate memory allocated in constructor
+		///////////////////////////////////////////////////////////////////////
+		~ROB(void);
+		
+		///////////////////////////////////////////////////////////////////////
 		/// Issue an instruction the to reorder buffer
 		///
 		/// @param[in] issued_instruction the instruction to add to the ROB
@@ -144,8 +151,12 @@ class ROB
 		
 		///////////////////////////////////////////////////////////////////////
 		/// Process all instructions in the reorder buffer
+		///
+		/// @param[in] rob_entry the rob entry containing instruction to commit
+		///
+		/// @returns TRUE if instruction was committed
 		///////////////////////////////////////////////////////////////////////
-		bool commit_instruction();
+		bool commit_instruction(ROB_Entry*& rob_entry);
 		
 	private:
 		ROB_Entry* m_rob_head; // head of ROB buffer
@@ -159,7 +170,5 @@ class ROB
 		ROB_Entry* m_tail;
 };
 
-// Initialize the ROB Entry numbers
-unsigned int ROB_Entry::s_next_id = 0;
-
 #endif // ROB_BUFFER_H_INCLUDED
+

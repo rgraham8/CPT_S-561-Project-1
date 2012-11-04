@@ -1,8 +1,55 @@
 ///////////////////////////////////////////////////////////////////////////////
 /// This file implements Tamasulo's Algorithm with Reorder Buffer
+///
+/// @file rob_buffer.cpp
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "rob_buffer.hpp"
+
+//Instruction_Set m_instruction;
+//Register* m_destination_register;
+//Register* m_source_register_one;
+//Register* m_source_register_two;
+//unsigned int m_execution_counter;
+
+///////////////////////////////////////////////////////////////////////
+/// Check is a reservation station is available for this instruction
+///
+/// @param[in] instruction The instruction to be executed
+///
+/// @returns TRUE if a reservation station is available
+///////////////////////////////////////////////////////////////////////
+static bool reservation_station_available(Instruction& instruction)
+{
+	bool reservation_station_available = false;
+	
+	//switch(instruction.m_instruction)
+	//{
+		
+	//} 
+	
+	return reservation_station_available;
+}
+
+///////////////////////////////////////////////////////////////////////
+/// Execute the instruction in the RS corresponding to a ROB entry
+///
+/// @param[in] rob_entry rob entry containing instruction executing in RS
+///////////////////////////////////////////////////////////////////////
+static void execute_intruction(ROB_Entry*& rob_entry)
+{
+	
+}
+
+///////////////////////////////////////////////////////////////////////
+/// Write the result of the instruction to the common data bus
+///
+/// @param[in] rob_entry rob entry waiting on reservation station result
+///////////////////////////////////////////////////////////////////////
+static void write_instruction(ROB_Entry*& rob_entry)
+{
+	
+}
 
 ///////////////////////////////////////////////////////////////////////
 ROB::ROB(void)
@@ -42,6 +89,18 @@ ROB::ROB(void)
 	m_tail = m_rob_head;
 }
 
+ROB::~ROB(void)
+{
+	ROB_Entry* node = m_head;
+	ROB_Entry* next_node;
+	
+	while (node != NULL)
+	{
+		next_node = node->m_next;
+		delete node;
+		node = next_node;
+	}
+}
 ///////////////////////////////////////////////////////////////////////
 bool ROB::issue_instruction(Instruction issued_instruction)
 {
@@ -90,6 +149,13 @@ bool ROB::issue_instruction(Instruction issued_instruction)
 	return issue_successful;
 }
 
+///////////////////////////////////////////////////////////////////////
+bool ROB::commit_instruction(ROB_Entry*& rob_entry)
+{
+	return true;
+}
+
+///////////////////////////////////////////////////////////////////////
 void ROB::process_instructions(void)
 {
 	// Get the first ROB entry
@@ -144,3 +210,7 @@ void ROB::process_instructions(void)
 	
 	// Execute waiting instructions
 }
+
+// Initialize the ROB Entry numbers
+unsigned int ROB_Entry::s_next_id = 0;
+
