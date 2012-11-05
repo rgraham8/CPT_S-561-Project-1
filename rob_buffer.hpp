@@ -22,7 +22,7 @@ enum Instruction_Set
 	SUBTRACT
 };
 
-// The states of an ROB entry
+/// The states of an ROB entry
 enum STATE
 {
 	EMPTY,
@@ -33,11 +33,19 @@ enum STATE
 	COMMIT
 };
 
+///////////////////////////////////////////////////////////////////////////////
+/// Registe class representing a single floating point or interger register
+///////////////////////////////////////////////////////////////////////////////
 class Register
 {
 	public:
-		bool m_busy;
+		bool m_busy; ///< state of this register's data
 		
+		///////////////////////////////////////////////////////////////////////
+		/// Constructor
+		///
+		/// @param[in] busy state of this registers data
+		///////////////////////////////////////////////////////////////////////
 		Register(bool busy): m_busy(busy){}
 	
 };
@@ -48,8 +56,9 @@ class Register
 class FP_Register : public Register
 {
 	public:
-		float data;
+		float data; ///< register's data
 		
+		///////////////////////////////////////////////////////////////////////
 		FP_Register(void):
 			Register(false),
 			data(0){}
@@ -61,11 +70,11 @@ class FP_Register : public Register
 class Int_Register : public Register
 {
 	public:
-		bool busy;
-		int data;
+		int data; ///< register's data
 		
+		///////////////////////////////////////////////////////////////////////
 		Int_Register(void):
-			busy(false),
+			Register(false),
 			data(0){}
 };
 
@@ -75,11 +84,13 @@ class Int_Register : public Register
 class Instruction
 {
 	public:
-		Instruction_Set m_instruction;
-		Register* m_destination_register;
-		Register* m_source_register_one;
-		Register* m_source_register_two;
-		unsigned int m_execution_counter;
+		Instruction_Set m_instruction; ///< actually instruction to be executed
+		Register* m_destination_register; ///< destination register of result
+		Register* m_source_register_one; ///< source 1 register
+		Register* m_source_register_two; ///< source 2 register
+		unsigned int m_execution_counter; ///< remaining execution time counter
+		
+		///////////////////////////////////////////////////////////////////////
 		Instruction(void):
 			m_instruction(NOOP),
 			m_destination_register(NULL),
@@ -98,11 +109,9 @@ class ROB_Entry
 		Instruction m_instruction; ///< instruction being issued/executed
 		STATE m_state; ///< the state of the unit
 		long* m_destination; ///< the destination register
-		unsigned int m_entry_number; // entry number
+		unsigned int m_entry_number; ///< entry number
 		ROB_Entry* m_next; ///< next pointer for circular buffer
 		
-		///////////////////////////////////////////////////////////////////////
-		// Constructor
 		///////////////////////////////////////////////////////////////////////
 		ROB_Entry(void):	
 			m_busy(false),
@@ -115,7 +124,7 @@ class ROB_Entry
 		}
 	
 	private:
-		static unsigned int s_next_id; // used to increment each entry number
+		static unsigned int s_next_id; ///< unique entry number
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -126,12 +135,8 @@ class ROB
 {
 	public:
 		///////////////////////////////////////////////////////////////////////
-		/// Constructor: Initializes the ROB circular buffer
-		///////////////////////////////////////////////////////////////////////
 		ROB(void);
 		
-		///////////////////////////////////////////////////////////////////////
-		/// Destructor: Deallocate memory allocated in constructor
 		///////////////////////////////////////////////////////////////////////
 		~ROB(void);
 		
@@ -159,15 +164,20 @@ class ROB
 		bool commit_instruction(ROB_Entry*& rob_entry);
 		
 	private:
-		ROB_Entry* m_rob_head; // head of ROB buffer
+		ROB_Entry* m_rob_head; ///< Head of ROB buffer
 		
-		// Commit stage increments this to remove instructions
-		// from the list (FULL when head == tail)
-		ROB_Entry* m_head;
+		ROB_Entry* m_head; ///< Commit stage increments this to remove instructions
+						   ///< from the list (FULL when head == tail)
+						   ///<
 		
-		// Dispatch stage increments this to add instructions
-		// to the list
-		ROB_Entry* m_tail;
+		ROB_Entry* m_tail; ///< Dispatch stage increments this to add instructions
+						   ///< to the list
+						   ///<
+		
+		int32_t m_memory[MEMORY_SIZE_BYTES]; ///< Pointer to hardware memory
+		
+		FP_Register m_fp_register[NUM_FP_REGISTERS]; ///< array of FP registers
+		Int_Register m_int_register[NUM_INT_REGISTERS]; ///< array of integer registers
 };
 
 #endif // ROB_BUFFER_H_INCLUDED

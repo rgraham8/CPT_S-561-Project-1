@@ -89,11 +89,14 @@ ROB::ROB(void)
 	m_tail = m_rob_head;
 }
 
+///////////////////////////////////////////////////////////////////////
 ROB::~ROB(void)
 {
 	ROB_Entry* node = m_head;
 	ROB_Entry* next_node;
 	
+	// Delete the memory allocated for each
+	// reorder buffer entry
 	while (node != NULL)
 	{
 		next_node = node->m_next;
@@ -208,7 +211,7 @@ void ROB::process_instructions(void)
 		temp = temp->m_next;
 	} while(temp != m_head);
 	
-	// Execute waiting instructions
+	// Begin execution of waiting units if data is now available
 }
 
 // Initialize the ROB Entry numbers

@@ -7,25 +7,27 @@
 #ifndef ROB_CONFIG_H_INCLUDED
 #define ROB_CONFIG_H_INCLUDED
 
-// number of entries in the Reorder buffer
-#define ROB_SIZE 32 
+#define ROB_SIZE 32 ///< number of entries in the Reorder buffer
 
-// number of FP reservation stations
-#define NUM_FP_ADDER_RS 	 4
-#define NUM_FP_MULTIPLIER_RS 3
-#define NUM_LOAD_RS			 4
-#define NUM_STORE_RS		 4
-#define NUM_INT_RS			 4
+#define MEMORY_SIZE_BYTES 1000 ///< size of memory in bytes
 
-// Instruction Queue Size
-#define INSTRUCTION_QUEUE_SIZE 64
+#define NUM_FP_ADDER_RS 	 4 ///< number of FP reservation stations
+#define NUM_FP_MULTIPLIER_RS 3 ///< number of FP multiply reservation stations
+#define NUM_LOAD_RS			 4 ///< number of load reservation stations
+#define NUM_STORE_RS		 4 ///< number of store reservation stations
+#define NUM_INT_RS			 4 ///< number of integer unit reservation stations
+
+#define INSTRUCTION_QUEUE_SIZE 64 ///< Instruction Queue Size
+
+#define NUM_FP_REGISTERS 16 ///< number of FP registers
+#define NUM_INT_REGISTERS 16 ///< number of interget registers
 
 // Execution Times
-#define FP_ADD_SUB_CYCLE_TIME 3
-#define FP_MULTIPLY_CYCLE_TIME 6
-#define FP_DIVIDE_CYCLE_TIME 13
-#define LOAD_CYCLE_TIME 2
-#define STORE_CYCLE_TIME 1
-#define INTEGER_INSTRUCTION_CYCLE_TIME 1
+#define FP_ADD_SUB_CYCLE_TIME 3 ///< add/sub exectuion time
+#define FP_MULTIPLY_CYCLE_TIME 6 ///< fp multiply execution time
+#define FP_DIVIDE_CYCLE_TIME 13 ///< fp divide execution time
+#define LOAD_CYCLE_TIME 2 ///< load execution time
+#define STORE_CYCLE_TIME 1 ///< store execution time
+#define INTEGER_INSTRUCTION_CYCLE_TIME 1 ///< integer instruction excution time
 
 #endif // ROB_CONFIG_H_INCLUDED
