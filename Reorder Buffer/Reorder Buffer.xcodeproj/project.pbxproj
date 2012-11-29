@@ -1,0 +1,217 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0EF121F31659FA18008FA963 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0EF121F21659FA18008FA963 /* main.cpp */; };
+		0EF121F51659FA18008FA963 /* Reorder_Buffer.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0EF121F41659FA18008FA963 /* Reorder_Buffer.1 */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		0EF121EC1659FA18008FA963 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+				0EF121F51659FA18008FA963 /* Reorder_Buffer.1 in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0EF121EE1659FA18008FA963 /* Reorder Buffer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Reorder Buffer"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0EF121F21659FA18008FA963 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		0EF121F41659FA18008FA963 /* Reorder_Buffer.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = Reorder_Buffer.1; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		0EF121EB1659FA18008FA963 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0EF121E31659FA18008FA963 = {
+			isa = PBXGroup;
+			children = (
+				0EF121F11659FA18008FA963 /* Reorder Buffer */,
+				0EF121EF1659FA18008FA963 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		0EF121EF1659FA18008FA963 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0EF121EE1659FA18008FA963 /* Reorder Buffer */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		0EF121F11659FA18008FA963 /* Reorder Buffer */ = {
+			isa = PBXGroup;
+			children = (
+				0EF121F21659FA18008FA963 /* main.cpp */,
+				0EF121F41659FA18008FA963 /* Reorder_Buffer.1 */,
+			);
+			path = "Reorder Buffer";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0EF121ED1659FA18008FA963 /* Reorder Buffer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0EF121F81659FA18008FA963 /* Build configuration list for PBXNativeTarget "Reorder Buffer" */;
+			buildPhases = (
+				0EF121EA1659FA18008FA963 /* Sources */,
+				0EF121EB1659FA18008FA963 /* Frameworks */,
+				0EF121EC1659FA18008FA963 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Reorder Buffer";
+			productName = "Reorder Buffer";
+			productReference = 0EF121EE1659FA18008FA963 /* Reorder Buffer */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0EF121E51659FA18008FA963 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0450;
+				ORGANIZATIONNAME = "Robert Graham";
+			};
+			buildConfigurationList = 0EF121E81659FA18008FA963 /* Build configuration list for PBXProject "Reorder Buffer" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 0EF121E31659FA18008FA963;
+			productRefGroup = 0EF121EF1659FA18008FA963 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0EF121ED1659FA18008FA963 /* Reorder Buffer */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0EF121EA1659FA18008FA963 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0EF121F31659FA18008FA963 /* main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		0EF121F61659FA18008FA963 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		0EF121F71659FA18008FA963 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		0EF121F91659FA18008FA963 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		0EF121FA1659FA18008FA963 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0EF121E81659FA18008FA963 /* Build configuration list for PBXProject "Reorder Buffer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0EF121F61659FA18008FA963 /* Debug */,
+				0EF121F71659FA18008FA963 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0EF121F81659FA18008FA963 /* Build configuration list for PBXNativeTarget "Reorder Buffer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0EF121F91659FA18008FA963 /* Debug */,
+				0EF121FA1659FA18008FA963 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0EF121E51659FA18008FA963 /* Project object */;
+}
