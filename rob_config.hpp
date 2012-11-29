@@ -11,9 +11,12 @@
 
 #define MEMORY_SIZE_BYTES 1000 ///< size of memory in bytes
 
-#define NUM_FP_ADDER_RS 	 4 ///< number of FP reservation stations
+#define MAX_ISSUE_PER_CYCLE 2 ///< max number of instructions that can
+							 ///< be issued per cycle
+							
+#define NUM_FP_ADDER_RS 	 3 ///< number of FP reservation stations
 #define NUM_FP_MULTIPLIER_RS 3 ///< number of FP multiply reservation stations
-#define NUM_LOAD_RS			 4 ///< number of load reservation stations
+#define NUM_LOAD_RS			 3 ///< number of load reservation stations
 #define NUM_STORE_RS		 4 ///< number of store reservation stations
 #define NUM_INT_RS			 4 ///< number of integer unit reservation stations
 
@@ -26,7 +29,7 @@
 #define FP_ADD_SUB_CYCLE_TIME 3 ///< add/sub exectuion time
 #define FP_MULTIPLY_CYCLE_TIME 6 ///< fp multiply execution time
 #define FP_DIVIDE_CYCLE_TIME 13 ///< fp divide execution time
-#define LOAD_CYCLE_TIME 2 ///< load execution time
+#define LOAD_CYCLE_TIME 1 ///< load execution time
 #define STORE_CYCLE_TIME 1 ///< store execution time
 #define INTEGER_INSTRUCTION_CYCLE_TIME 1 ///< integer instruction excution time
 
