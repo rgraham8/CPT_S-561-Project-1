@@ -7,7 +7,7 @@
 #include "rob_buffer.hpp"
 
 ///////////////////////////////////////////////////////////////////////////////
-static void process_reservation_station(Reservation_Station* rs, std::vector<Reservation_Station*>& waiting_units)
+void ROB::process_reservation_station(Reservation_Station* rs, std::vector<Reservation_Station*>& waiting_units, bool from_queue)
 {
 	if ((rs->m_waiting_rob_entry_value_one != NULL) &&
 		!rs->m_waiting_rob_entry_value_one->m_busy)
@@ -37,17 +37,75 @@ static void process_reservation_station(Reservation_Station* rs, std::vector<Res
 		{
 			rs->m_rob_entry->m_state = EXECUTION_COMPLETE;
 			
+			float* temp = NULL;
+			
 			// Perform respective operation to get result
+			switch(rs->m_rob_entry->m_instruction->m_type)
+			{
+				case FLOATING_POINT:
+				case INTEGER:
+					switch(rs->m_rob_entry->m_instruction->m_instruction)
+					{
+						case ADD:
+						case ADDI:
+							rs->m_result = rs->m_source_one + rs->m_source_two;
+							break;
+						case MULTIPLY:
+							rs->m_result = rs->m_source_one * rs->m_source_two;
+							break;
+						case DIVIDE:
+							rs->m_result = rs->m_source_one / rs->m_source_two;
+							break;
+						case SUBTRACT:
+						case SUBI:
+							rs->m_result = rs->m_source_one - rs->m_source_two;
+							break;		
+						default:
+						assert(false);
+					}
+					
+					// Cast to float or int
+					rs->m_result = (rs->m_rob_entry->m_instruction->m_type == INTEGER) ? (int)rs->m_result : (float)rs->m_result;
+					
+					break;
+					
+				case LOAD:
+
+					temp = m_memory + (int)(rs->m_source_one + rs->m_source_two);
+					std::cout<<"S1: "<<rs->m_source_one<<" S2: "<<rs->m_source_two<<std::endl;
+					assert(temp <= &m_memory[MEMORY_SIZE_BYTES-1]);
+					
+					rs->m_result = *temp;
+					
+					// Cast to float or int
+					rs->m_result = (rs->m_rob_entry->m_destination_register->m_type == INT) ? (int)rs->m_result : (float)rs->m_result;
+					
+					break;
+					
+				case STORE:
+
+					temp = m_memory + (int)(rs->m_source_two + rs->m_rob_entry->m_instruction->m_load_store_offset);
+
+					assert(temp <= &m_memory[MEMORY_SIZE_BYTES-1]);
+					
+					*temp = rs->m_source_one;
+					
+					break;
+					
+				default:
+					assert(false);
+					
+			}
 			// rs->m_result...
 			
 			std::cout<<"Execution Complete: ";
-			std::cout<<rs->m_rob_entry->m_instruction->m_raw_instruction<<std::endl;
+			std::cout<<rs->m_rob_entry->m_instruction->m_raw_instruction<<"\t"<<rs->m_result<<std::endl;
 		}
 	}
-	else
+	else if (!from_queue)
 	{
 		rs->m_rob_entry->m_state = WAITING;
-		std::cout<<"Waiting: "<<rs->m_rob_entry->m_instruction->m_raw_instruction<<std::endl;
+		//std::cout<<"Waiting: "<<rs->m_rob_entry->m_instruction->m_raw_instruction<<std::endl;
 		waiting_units.push_back(rs);
 	}
 }
@@ -113,7 +171,6 @@ bool ROB::reservation_station_available(std::vector<Instruction>::iterator& inst
 				&& !integer_rs_in_use)
 			{
 				rs.m_execution_counter = INTEGER_INSTRUCTION_CYCLE_TIME;
-				integer_reservation_stations.push_back(rs);
 				integer_rs_in_use = true;
 				reservation_station_available = true;
 				
@@ -127,7 +184,6 @@ bool ROB::reservation_station_available(std::vector<Instruction>::iterator& inst
 				&& !load_rs_in_use)
 			{
 				rs.m_execution_counter = LOAD_CYCLE_TIME;
-				load_reservation_stations.push_back(rs);
 				load_rs_in_use = true;
 				reservation_station_available = true;
 		
@@ -141,7 +197,6 @@ bool ROB::reservation_station_available(std::vector<Instruction>::iterator& inst
 				&& !store_rs_in_use)
 			{
 				rs.m_execution_counter = STORE_CYCLE_TIME;
-				store_reservation_stations.push_back(rs);
 				store_rs_in_use = true;
 				reservation_station_available = true;
 				
@@ -159,11 +214,10 @@ bool ROB::reservation_station_available(std::vector<Instruction>::iterator& inst
 	goto DONE;
 	
 SETUP:
-    if (instruction->m_source_register_one == NULL) // LD, ST, etc
+    if (instruction->m_source_register_one == NULL) // LD, etc
 	{
 		rs.m_source_one = instruction->m_load_store_offset;
-		assert((instruction->m_type == LOAD) ||
-			(instruction->m_type == STORE));
+		assert((instruction->m_type == LOAD));
 	}
 	else if (instruction->m_source_register_one->m_busy)
 	{
@@ -175,7 +229,7 @@ SETUP:
 	{
 		rs.m_source_one = instruction->m_source_register_one->m_data;
 	}
-	
+
 	if (instruction->m_source_register_two == NULL) // ADDI, SUBI, etc
 	{
 		rs.m_source_two = instruction->m_immediate_value;
@@ -203,6 +257,18 @@ SETUP:
 			fp_adder_reservation_stations.push_back(rs);
 		}
 	}
+	else if (instruction->m_type == INTEGER)
+	{
+		integer_reservation_stations.push_back(rs);
+	}
+	else if (instruction->m_type == LOAD)
+	{
+		load_reservation_stations.push_back(rs);
+	}
+	else if (instruction->m_type == STORE)
+	{
+		store_reservation_stations.push_back(rs);
+	}
 
 DONE:
 	return reservation_station_available;
@@ -218,7 +284,8 @@ void ROB::execute_intructions(void)
 	// Loop through all the reservation stations
 	for (typeof(m_reservation_stations.begin()) it = m_reservation_stations.begin(); it < m_reservation_stations.end(); it++)
 	{	
-		std::vector<typeof((*it)->begin())> slots_to_remove;
+		std::vector< std::vector<Reservation_Station>::iterator > slots_to_remove;
+		
 		// Loop through all the slots in this reservation station
 		for (typeof((*it)->begin()) rs = (*it)->begin(); rs < (*it)->end(); rs++)
 		{
@@ -236,8 +303,7 @@ void ROB::execute_intructions(void)
 			}
 			else
 			{
-				process_reservation_station(&(*rs), waiting_units);
-				std::cout<<"Num of Waiting: "<<waiting_units.size()<<std::endl;
+				process_reservation_station(&(*rs), waiting_units, false);
 			}
 		}
 		
@@ -248,13 +314,13 @@ void ROB::execute_intructions(void)
 			(*it)->erase(*it_two);
 		}
 		
-		// Check the waiting units and see if they have 
-		for (typeof(waiting_units.begin()) waiting_rs = waiting_units.begin();
-			waiting_rs < waiting_units.end(); waiting_rs++)
-		{
-			
-		}
-		
+	}
+	
+	// Check the waiting units and see if they have 
+	for (typeof(waiting_units.begin()) waiting_rs = waiting_units.begin();
+		waiting_rs < waiting_units.end(); waiting_rs++)
+	{
+		process_reservation_station((*waiting_rs), waiting_units, true);
 	}
 }
 
@@ -264,6 +330,14 @@ ROB::ROB(void)
 	m_head = NULL;
 	ROB_Entry* last;
 	ROB_Entry* new_node;
+	
+	// Create memory
+	m_memory = new float[MEMORY_SIZE_BYTES];
+	srand (time(NULL));
+	for (int i = 0; i<MEMORY_SIZE_BYTES; ++i)
+	{
+		m_memory[i] = rand() % 100;
+	}
 	
 	// Build doublely linked list of ROB Entries
 	for (unsigned int i=0; i<ROB_SIZE; i++)
@@ -373,10 +447,17 @@ ROB::ROB(void)
 					throw std::runtime_error("Invalid register for load/store");
 				}
 				
-				// Store memory index for load/store (source 1)
+				// Store memory offset for load/store
 				temp_instruction.m_load_store_offset = atoi(source1.c_str());
 				
-				// Store source register
+				// For store, the source register 1 is the register to write to the memory
+				if (temp_instruction.m_type == STORE)
+				{
+					temp_instruction.m_source_register_one = temp_instruction.m_destination_register;
+					temp_instruction.m_destination_register = NULL;
+				}
+				
+				// Store source register (source 2)
 				if (source2[0] == 'R')
 				{
 					std::string source_register(source2.begin()+1, source2.end());
@@ -532,6 +613,8 @@ ROB::~ROB(void)
 		delete node;
 		node = next_node;
 	}
+	
+	delete [] m_memory;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -564,13 +647,21 @@ void ROB::issue_instruction(void)
 		instruction_ptr++;
 		
 		m_tail->m_state = ISSUE;
-		m_tail->m_destination_register = m_tail->m_instruction->m_destination_register;
-		m_tail->m_destination_register->m_busy = true;
-
-		// Store entry pointer in destination register
-		// so any following instruction issued knows to check this 
-		// entry for the result if/when it needs it
-		m_tail->m_destination_register->m_rob_entry = m_tail;
+		
+		if (m_tail->m_instruction->m_destination_register == NULL)
+		{
+			assert(m_tail->m_instruction->m_type == STORE);
+		}
+		else
+		{
+			m_tail->m_destination_register = m_tail->m_instruction->m_destination_register;
+			m_tail->m_destination_register->m_busy = true;
+		
+			// Store entry pointer in destination register
+			// so any following instruction issued knows to check this 
+			// entry for the result if/when it needs it
+			m_tail->m_destination_register->m_rob_entry = m_tail;
+		}
 		
 		// Point tail to next entry to be filled
 		m_tail = m_tail->m_next;

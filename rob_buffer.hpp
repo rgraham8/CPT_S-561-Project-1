@@ -51,6 +51,12 @@ enum INSTRUCTION_TYPE
 	STORE
 };
 
+enum REGISTER_TYPE
+{
+	FP,
+	INT
+};
+
 // FWD Declaration
 class ROB_Entry;
 
@@ -63,13 +69,18 @@ class Register
 		bool m_busy; ///< state of this register's data
 		ROB_Entry* m_rob_entry; ///< ROB entry currently holding register value
 		float m_data; ///< register's data
+		REGISTER_TYPE m_type; ///< type of register
 		
 		///////////////////////////////////////////////////////////////////////
 		/// Constructor
 		///
 		/// @param[in] busy state of this registers data
 		///////////////////////////////////////////////////////////////////////
-		Register(): m_busy(false), m_rob_entry(NULL), m_data(0){}
+		Register(REGISTER_TYPE type): m_busy(false), m_rob_entry(NULL), m_type(type)
+		{
+			srand (time(NULL));
+			m_data = rand() % 100;
+		}
 	
 };
 	
@@ -103,7 +114,7 @@ class FP_Register : public Register
 {
 	public:
 		///////////////////////////////////////////////////////////////////////
-		FP_Register(void){}
+		FP_Register(): Register(FP){}
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -113,7 +124,7 @@ class Int_Register : public Register
 {
 	public:
 		///////////////////////////////////////////////////////////////////////
-		Int_Register(void){}
+		Int_Register(): Register(INT){}
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -222,6 +233,9 @@ class ROB
 		void execute_intructions(void);
 		
 	private:
+		
+		void process_reservation_station(Reservation_Station* rs, std::vector<Reservation_Station*>& waiting_units, bool from_queue);
+		
 		ROB_Entry* m_head; ///< Commit stage increments this to remove instructions
 						   ///< from the list (FULL when head == tail)
 						   ///<
@@ -232,7 +246,7 @@ class ROB
 						
 		int rob_slot_counter;
 		
-		int32_t m_memory[MEMORY_SIZE_BYTES]; ///< Pointer to hardware memory
+		float* m_memory; ///< Pointer to hardware memory
 		
 		bool fp_adder_rs_in_use;
 		bool fp_multiplier_rs_in_use;
