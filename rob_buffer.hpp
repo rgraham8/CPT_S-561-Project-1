@@ -150,7 +150,7 @@ class Instruction
 			m_source_register_two(NULL),
 			m_load_store_offset(0),
 			m_immediate_value(0),
-			m_type(LOAD),
+			m_type(FLOATING_POINT),
 			m_raw_instruction(""),
 			m_loop_name("")
 			{}
@@ -225,7 +225,7 @@ class ROB
 		///
 		/// @param[in] rob_entry the rob entry containing instruction to commit
 		///////////////////////////////////////////////////////////////////////
-		void commit_instruction(ROB_Entry*& rob_entry);
+		void commit_instruction(void);
 		
 		///////////////////////////////////////////////////////////////////////
 		/// Execute the instructions in all the reservation stations

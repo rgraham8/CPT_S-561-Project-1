@@ -30,11 +30,19 @@ void ROB::process_reservation_station(Reservation_Station* rs, std::vector<Reser
 		{
 			rs->m_execution_counter--;
 			rs->m_rob_entry->m_state = EXECUTING;
-			std::cout<<rs->m_rob_entry->m_instruction->m_raw_instruction;
-			std::cout<<"  "<<rs->m_execution_counter<<std::endl;
+			
+			std::cout<<"EXECUTING\t";
+			std::cout<<rs->m_rob_entry->m_instruction->m_raw_instruction<<"\t"<<rs->m_execution_counter+1<<std::endl;
 		}
 		else // (rs->m_execution_counter == 0)
 		{
+			if (rs->m_rob_entry->m_state == EXECUTION_COMPLETE)
+			{
+				std::cout<<"WRITING\t";
+				std::cout<<rs->m_rob_entry->m_instruction->m_raw_instruction<<"\t"<<rs->m_result<<std::endl;
+				return;
+			}
+			
 			rs->m_rob_entry->m_state = EXECUTION_COMPLETE;
 			
 			float* temp = NULL;
@@ -72,7 +80,6 @@ void ROB::process_reservation_station(Reservation_Station* rs, std::vector<Reser
 				case LOAD:
 
 					temp = m_memory + (int)(rs->m_source_one + rs->m_source_two);
-					std::cout<<"S1: "<<rs->m_source_one<<" S2: "<<rs->m_source_two<<std::endl;
 					assert(temp <= &m_memory[MEMORY_SIZE_BYTES-1]);
 					
 					rs->m_result = *temp;
@@ -96,16 +103,16 @@ void ROB::process_reservation_station(Reservation_Station* rs, std::vector<Reser
 					assert(false);
 					
 			}
-			// rs->m_result...
 			
-			std::cout<<"Execution Complete: ";
-			std::cout<<rs->m_rob_entry->m_instruction->m_raw_instruction<<"\t"<<rs->m_result<<std::endl;
+			std::cout<<"Execution Complete\t";
+			std::cout<<rs->m_rob_entry->m_instruction->m_raw_instruction<<"\t\t"<<rs->m_result<<std::endl;
 		}
 	}
 	else if (!from_queue)
 	{
 		rs->m_rob_entry->m_state = WAITING;
-		//std::cout<<"Waiting: "<<rs->m_rob_entry->m_instruction->m_raw_instruction<<std::endl;
+		std::cout<<"WAITING\t";
+		std::cout<<rs->m_rob_entry->m_instruction->m_raw_instruction<<std::endl;
 		waiting_units.push_back(rs);
 	}
 }
@@ -120,7 +127,7 @@ bool ROB::reservation_station_available(std::vector<Instruction>::iterator& inst
 		(instruction->m_type != LOAD) && 
 		(instruction->m_type != STORE))
 	{
-		return true;
+		return false;
 	}
 	
 	Reservation_Station rs;
@@ -293,11 +300,12 @@ void ROB::execute_intructions(void)
 			if ((rs->m_rob_entry->m_state == EXECUTION_COMPLETE) &&
 				(writing == false))
 			{
-				std::cout<<"Writing Result for instruction: ";
+				std::cout<<"COMMIT\t";
 				std::cout<<rs->m_rob_entry->m_instruction->m_raw_instruction<<std::endl;
 				writing = true;
 				rs->m_rob_entry->m_value = rs->m_result;
 				rs->m_rob_entry->m_busy = false;
+				rs->m_rob_entry->m_state = COMMIT;
 				slots_to_remove.push_back(rs);
 				continue;
 			}
@@ -413,6 +421,10 @@ ROB::ROB(void)
 				ss >> loop_name >> operation;
 				
 				loop_name.erase(loop_name.end()-1); // remove ":"
+				
+				// Store the instruction without the LOOP_NAME
+				temp_instruction.m_raw_instruction =  
+					std::string(std::find(instruction.begin(), instruction.end(), ':')+2, instruction.end());
 			}
 			
 			if (operation == "LD" || operation == "SD")
@@ -646,7 +658,12 @@ void ROB::issue_instruction(void)
 		m_tail->m_instruction = instruction_ptr;
 		instruction_ptr++;
 		
+		assert(m_tail->m_state == EMPTY);
+		
 		m_tail->m_state = ISSUE;
+		
+		std::cout<<"ISSUE\t";
+		std::cout<<m_tail->m_instruction->m_raw_instruction<<"\t"<<std::endl;
 		
 		if (m_tail->m_instruction->m_destination_register == NULL)
 		{
@@ -669,29 +686,53 @@ void ROB::issue_instruction(void)
 		// Increment entry counter
 		rob_slot_counter++;
 	}
+	
+	// Stall if instruction was NOOP
+	if ((instruction_ptr->m_instruction == NOOP) &&
+		(instruction_ptr->m_type != LOAD) && 
+		(instruction_ptr->m_type != STORE) &&
+		(instruction_ptr != m_instruction_queue.end()))
+	{
+		instruction_ptr++;
+		std::cout<<"<- Stall due to NOOP ->"<<std::endl;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////
-void ROB::commit_instruction(ROB_Entry*& rob_entry)
+void ROB::commit_instruction(void)
 {
-	rob_entry->m_state = EMPTY;
-	rob_slot_counter--;
-	this->m_head = this->m_head->m_next;
+	if (m_head->m_state == COMMIT)
+	{
+		//std::cout<<"Commiting Instruction: "<<m_head->m_instruction->m_raw_instruction<<std::endl;
+		
+		m_head->m_state = EMPTY;
+		rob_slot_counter--;
+		m_head = m_head->m_next;
+	}
+	
+	// Output remaining slots that are waiting to be committed...
+	for (ROB_Entry* temp = m_head; (temp != NULL && temp != m_head); temp = temp->m_next)
+	{
+		if (temp->m_state == COMMIT)
+		{
+			std::cout<<"COMMIT\t";
+			std::cout<<temp->m_instruction->m_raw_instruction<<std::endl;
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////
 void ROB::process_instructions(void)
 {
-	// COMMIT
-	// Attempt to commit instruction waiting to be commited.
-	// Only one commit per cycle.
-	if (m_head->m_state == COMMIT)
-	{
-		commit_instruction(m_head); //removes from ROB
-	}
+	static int cycle_number = 0;
 	
-	// EXECUTE
-	execute_intructions(); 
+	std::cout<<"\n<-- Cyle #: "<<cycle_number<<" -->\n"<<std::endl;
+	
+	commit_instruction();
+	execute_intructions();
+	issue_instruction();
+	
+	cycle_number++;
 }
 
 // Initialize the ROB Entry numbers
