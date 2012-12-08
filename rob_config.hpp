@@ -11,7 +11,7 @@
 
 #define MEMORY_SIZE_BYTES 1000 ///< size of memory in bytes
 
-#define MAX_ISSUE_PER_CYCLE 4 ///< max number of instructions that can
+//#define MAX_ISSUE_PER_CYCLE 1 ///< max number of instructions that can
 							 ///< be issued per cycle
 							
 #define NUM_FP_ADDER_RS 	 3 ///< number of FP reservation stations

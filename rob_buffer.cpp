@@ -314,7 +314,7 @@ void ROB::execute_intructions(void)
 			// Write results
 			if ((rs->m_rob_entry->m_state == EXECUTION_COMPLETE))
 			{
-				if (writing == MAX_ISSUE_PER_CYCLE)
+				if (writing == m_max_num_issue)
 				{
 					continue;
 				}
@@ -354,6 +354,7 @@ ROB::ROB(void)
 	m_int_register[2].m_data = 88;
 	m_int_register[3].m_data = 3;
 	
+	m_max_num_issue = 1;
 	m_flush_buffer = false;
 	
 	// Create memory
@@ -529,7 +530,7 @@ ROB::ROB(void)
 				{
 					if (branch_predictor.find(temp_instruction.m_raw_instruction) == branch_predictor.end()){}
 					{
-						std::cout<<temp_instruction.m_raw_instruction<<std::endl;
+						//std::cout<<temp_instruction.m_raw_instruction<<std::endl;
 						branch_predictor[temp_instruction.m_raw_instruction] = true;
 					}
 					
@@ -708,7 +709,7 @@ void ROB::issue_instruction(void)
 	
 	while ((rob_slot_counter != ROB_SIZE) &&
 		   (instruction_ptr != m_instruction_queue.end()) &&
-		   (num_of_issued_instructions < MAX_ISSUE_PER_CYCLE))
+		   (num_of_issued_instructions < m_max_num_issue))
 	{
 		if (!reservation_station_available(instruction_ptr, m_tail))
 		{
@@ -721,12 +722,7 @@ void ROB::issue_instruction(void)
 		
 		// Initialize entry parameters
 		m_tail->m_instruction = instruction_ptr;
-		if (m_tail->m_instruction->m_instruction == BNEZ && 
-			!branch_predictor[m_tail->m_instruction->m_raw_instruction])
-		{
-			std::cout<<m_tail->m_instruction->m_raw_instruction<<std::endl;
-			//assert(false);
-		}
+
 		if (m_tail->m_instruction->m_instruction == BNEZ && 
 			branch_predictor[m_tail->m_instruction->m_raw_instruction])
 		{
@@ -789,7 +785,7 @@ void ROB::issue_instruction(void)
 void ROB::commit_instruction(void)
 {
 	int num_commit = 0;
-	while(num_commit != MAX_ISSUE_PER_CYCLE)
+	while(num_commit != m_max_num_issue)
 	{
 		if (m_head->m_state == COMMIT)
 		{
@@ -812,7 +808,7 @@ void ROB::commit_instruction(void)
 }
 
 ///////////////////////////////////////////////////////////////////////
-void ROB::process_instructions(void)
+bool ROB::process_instructions(void)
 {
 	static int cycle_number = 0;
 	
@@ -871,6 +867,11 @@ void ROB::process_instructions(void)
 		//assert(false);
 	}
 	
+	if (m_head->m_state == EMPTY)
+	{
+		return false;
+	}
+	
 	ROB_Entry* temp = m_head;
 	for (int i = 0; i != ROB_SIZE; temp = temp->m_next, i++)
 	{
@@ -927,6 +928,8 @@ void ROB::process_instructions(void)
 	//std::cout<<std::endl;
 	
 	cycle_number++;
+	
+	return true;
 }
 
 // Initialize the ROB Entry numbers

@@ -26,13 +26,16 @@ int main(int argc, char* argv[])
 	try
 	{
 		ROB reorder_buffer;
+		
+		std::cout<<"Enter number of instructions issued per cyle: "<<std::endl;
+		
+		int num_issue_count = 1;
+		std::cin>>num_issue_count;
+		reorder_buffer.set_num_issue_per_cyle(num_issue_count);
 
 		std::cout<<"\nSTATE\tINSTRUCTION\tEXECUTION COUNTER\tRESULT\n"<<std::endl;
 		
-		for (int cycle = 0; cycle < 60; cycle++)
-		{
-			reorder_buffer.process_instructions();
-		}
+		while (reorder_buffer.process_instructions()){}
 	}
 	catch (std::runtime_error &e)
 	{
@@ -42,6 +45,8 @@ int main(int argc, char* argv[])
 	{
 		std::cout<<"Unknown error"<<std::endl;
 	}
+
+	std::cout<<"EOP"<<std::endl;
 
 	return 0;
 }

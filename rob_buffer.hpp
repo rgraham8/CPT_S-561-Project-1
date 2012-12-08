@@ -223,8 +223,10 @@ class ROB
 		
 		///////////////////////////////////////////////////////////////////////
 		/// Process all instructions in the reorder buffer
+		///
+		/// @return whether any instructions are in the ROB
 		///////////////////////////////////////////////////////////////////////
-		void process_instructions(void);
+		bool process_instructions(void);
 		
 		///////////////////////////////////////////////////////////////////////
 		/// Process all instructions in the reorder buffer
@@ -238,6 +240,10 @@ class ROB
 		///////////////////////////////////////////////////////////////////////
 		void execute_intructions(void);
 		
+		void set_num_issue_per_cyle(int num)
+		{
+			m_max_num_issue = num;
+		}
 	private:
 		
 		void process_reservation_station(Reservation_Station* rs, std::vector<Reservation_Station*>& waiting_units, bool from_queue);
@@ -251,6 +257,8 @@ class ROB
 						   ///<
 						
 		int rob_slot_counter;
+		
+		int m_max_num_issue;
 		
 		float* m_memory; ///< Pointer to hardware memory
 		
