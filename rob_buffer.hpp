@@ -28,7 +28,9 @@ enum Instruction_Set
 	DIVIDE,
 	SUBTRACT,
 	SUBI,
-	ADDI
+	ADDI,
+	SLTI,
+	BNEZ
 };
 
 /// The states of an ROB entry
@@ -48,7 +50,8 @@ enum INSTRUCTION_TYPE
 	FLOATING_POINT,
 	INTEGER,
 	LOAD,
-	STORE
+	STORE,
+	BRANCH
 };
 
 enum REGISTER_TYPE
@@ -142,6 +145,7 @@ class Instruction
 		INSTRUCTION_TYPE m_type; ///< type of operation
 		std::string m_raw_instruction; ///< raw instruction read from file
 		std::string m_loop_name; ///< loop name
+		std::string m_branch_name;
 		///////////////////////////////////////////////////////////////////////
 		Instruction(void):
 			m_instruction(NOOP),
@@ -152,7 +156,8 @@ class Instruction
 			m_immediate_value(0),
 			m_type(FLOATING_POINT),
 			m_raw_instruction(""),
-			m_loop_name("")
+			m_loop_name(""),
+			m_branch_name("")
 			{}
 };
 
