@@ -17,6 +17,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <cstdlib>
+#include <map>
 
 #include "rob_config.hpp"
 
@@ -272,6 +273,9 @@ class ROB
 		std::vector<Instruction> m_instruction_queue;
 		std::vector<Instruction>::iterator instruction_ptr; ///< next instruction 
 															///< to be issued from queue
+		std::map<std::string, bool> branch_predictor;
+		bool m_flush_buffer;
+		ROB_Entry* m_branch_entry;
 };
 
 #endif // ROB_BUFFER_H_INCLUDED

@@ -30,7 +30,11 @@ void ROB::process_reservation_station(Reservation_Station* rs, std::vector<Reser
 		{
 			if (rs->m_source_one == 0)
 			{
-				assert(false);
+				branch_predictor[rs->m_rob_entry->m_instruction->m_raw_instruction] = false;
+				m_flush_buffer = true;
+				m_branch_entry = rs->m_rob_entry;
+				//std::cout<<rs->m_rob_entry->m_instruction->m_raw_instruction<<std::endl;
+				//assert(false);
 			}
 		}
 		if (rs->m_execution_counter != 0)
@@ -350,6 +354,8 @@ ROB::ROB(void)
 	m_int_register[2].m_data = 88;
 	m_int_register[3].m_data = 3;
 	
+	m_flush_buffer = false;
+	
 	// Create memory
 	m_memory = new float[MEMORY_SIZE_BYTES];
 	srand (time(NULL));
@@ -521,6 +527,12 @@ ROB::ROB(void)
 				ss >> source1 >> destination;
 				if (operation == "BNEZ")
 				{
+					if (branch_predictor.find(temp_instruction.m_raw_instruction) == branch_predictor.end()){}
+					{
+						std::cout<<temp_instruction.m_raw_instruction<<std::endl;
+						branch_predictor[temp_instruction.m_raw_instruction] = true;
+					}
+					
 					if (source1[0] == 'R')
 					{
 						std::string source_register(source1.begin()+1, source1.end());
@@ -709,8 +721,14 @@ void ROB::issue_instruction(void)
 		
 		// Initialize entry parameters
 		m_tail->m_instruction = instruction_ptr;
-		
-		if (m_tail->m_instruction->m_instruction == BNEZ)
+		if (m_tail->m_instruction->m_instruction == BNEZ && 
+			!branch_predictor[m_tail->m_instruction->m_raw_instruction])
+		{
+			std::cout<<m_tail->m_instruction->m_raw_instruction<<std::endl;
+			//assert(false);
+		}
+		if (m_tail->m_instruction->m_instruction == BNEZ && 
+			branch_predictor[m_tail->m_instruction->m_raw_instruction])
 		{
 			std::vector<Instruction>::iterator it = m_instruction_queue.begin();
 			while (it != m_instruction_queue.end())
@@ -803,6 +821,55 @@ void ROB::process_instructions(void)
 	commit_instruction();
 	execute_intructions();
 	issue_instruction();
+	
+	if (m_flush_buffer)
+	{
+		m_flush_buffer = false;
+		
+		ROB_Entry* entry_to_remove = m_branch_entry->m_next;
+		
+		if (entry_to_remove != m_head)
+		{
+			m_tail = entry_to_remove;
+		}
+		
+		instruction_ptr = m_branch_entry->m_instruction+1;
+		//std::cout<<"X: "<<instruction_ptr->m_raw_instruction<<std::endl;
+		//assert(false);
+		while (entry_to_remove != m_head)
+		{	
+			bool done_removing = false;
+			// Loop through all the reservation stations
+			for (int i=0; i < m_reservation_stations.size(); i++)
+			{	
+				// Loop through all the slots in this reservation station
+				for (int j = 0; j < m_reservation_stations[i]->size(); j++)
+				{
+					Reservation_Station* rs = &(m_reservation_stations[i]->at(j));
+
+					// Remove Slot
+					if ((rs->m_rob_entry == entry_to_remove))
+					{
+						m_reservation_stations[i]->erase(m_reservation_stations[i]->begin() + j);
+						j--;
+						done_removing = true;
+						break;
+					}
+				}
+				if (done_removing)
+				{
+					break;
+				}
+			}
+			
+			entry_to_remove->m_state = EMPTY;
+			//std::cout<<"REMOVING: "<<entry_to_remove->m_instruction->m_raw_instruction<<std::endl;
+			rob_slot_counter--;
+			entry_to_remove = entry_to_remove->m_next;
+		}
+		//std::cout<<"FLUSHED"<<std::endl;
+		//assert(false);
+	}
 	
 	ROB_Entry* temp = m_head;
 	for (int i = 0; i != ROB_SIZE; temp = temp->m_next, i++)

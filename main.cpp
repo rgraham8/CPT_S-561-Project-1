@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 
 		std::cout<<"\nSTATE\tINSTRUCTION\tEXECUTION COUNTER\tRESULT\n"<<std::endl;
 		
-		for (int cycle = 0; cycle < 30; cycle++)
+		for (int cycle = 0; cycle < 60; cycle++)
 		{
 			reorder_buffer.process_instructions();
 		}
