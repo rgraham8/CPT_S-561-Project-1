@@ -36,6 +36,13 @@ int main(int argc, char* argv[])
 		std::cout<<"\nSTATE\tINSTRUCTION\tEXECUTION COUNTER\tRESULT\n"<<std::endl;
 		
 		while (reorder_buffer.process_instructions()){}
+		
+		std::cout<<"EOP"<<std::endl;
+		
+		std::cout<<"-- Statistics --"<<std::endl;
+		std::cout<<"Average Issues Per Cycle: "<<reorder_buffer.get_avg_num_of_issues()<<std::endl;
+		std::cout<<"Average Writes Per Cycle: "<<reorder_buffer.get_avg_num_of_writes()<<std::endl;
+		std::cout<<"Average Commits Per Cycle: "<<reorder_buffer.get_avg_num_of_commits()<<std::endl;
 	}
 	catch (std::runtime_error &e)
 	{
@@ -45,8 +52,6 @@ int main(int argc, char* argv[])
 	{
 		std::cout<<"Unknown error"<<std::endl;
 	}
-
-	std::cout<<"EOP"<<std::endl;
 
 	return 0;
 }

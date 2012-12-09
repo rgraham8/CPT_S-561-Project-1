@@ -244,7 +244,36 @@ class ROB
 		{
 			m_max_num_issue = num;
 		}
+		
+		float get_avg_num_of_issues(void)
+		{
+			return average(m_num_of_issues_per_cycle);
+			
+		}
+		
+		float get_avg_num_of_writes(void)
+		{
+			return average(m_num_of_writes_per_cycle);
+		}
+		
+		float get_avg_num_of_commits(void)
+		{
+			return average(m_num_of_commits_per_cycle);
+		}
+		
 	private:
+		
+		float average(std::vector<int>& list)
+		{
+			float average = 0;
+			for (int i =0; i < list.size(); ++i)
+			{
+				average += list[i];
+			}
+
+			average = average/static_cast<long>((m_cycle_number+1));
+			return average;
+		}
 		
 		void process_reservation_station(Reservation_Station* rs, std::vector<Reservation_Station*>& waiting_units, bool from_queue);
 		
@@ -275,6 +304,16 @@ class ROB
 		std::vector<Reservation_Station> load_reservation_stations;
 		std::vector<Reservation_Station> store_reservation_stations;
 		std::vector<Reservation_Station> integer_reservation_stations;
+		
+		int m_cycle_number;
+		
+		std::vector<int> m_num_of_writes_per_cycle;
+		
+		std::vector<int> m_num_of_issues_per_cycle;
+		
+		std::vector<int> m_num_of_commits_per_cycle;
+		
+		
 		
 		std::vector< std::vector<Reservation_Station>* > m_reservation_stations;
 		

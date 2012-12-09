@@ -340,6 +340,8 @@ void ROB::execute_intructions(void)
 	{
 		process_reservation_station((*waiting_rs), waiting_units, true);
 	}
+	
+	m_num_of_writes_per_cycle.push_back(writing);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -356,6 +358,7 @@ ROB::ROB(void)
 	
 	m_max_num_issue = 1;
 	m_flush_buffer = false;
+	m_cycle_number = 0;
 	
 	// Create memory
 	m_memory = new float[MEMORY_SIZE_BYTES];
@@ -779,6 +782,8 @@ void ROB::issue_instruction(void)
 		instruction_ptr++;
 		std::cout<<"<- Stall due to NOOP ->"<<std::endl;
 	}
+	
+	m_num_of_issues_per_cycle.push_back(num_of_issued_instructions);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -805,14 +810,15 @@ void ROB::commit_instruction(void)
 		}
 		num_commit++;
 	}
+
+	m_num_of_commits_per_cycle.push_back(num_commit);
+	
 }
 
 ///////////////////////////////////////////////////////////////////////
 bool ROB::process_instructions(void)
-{
-	static int cycle_number = 0;
-	
-	std::cout<<"\n<-- Cyle #: "<<cycle_number+1<<" -->\n"<<std::endl;
+{	
+	std::cout<<"\n<-- Cyle #: "<<m_cycle_number+1<<" -->\n"<<std::endl;
 	
 	commit_instruction();
 	execute_intructions();
@@ -872,7 +878,13 @@ bool ROB::process_instructions(void)
 		return false;
 	}
 	
+	
 	ROB_Entry* temp = m_head;
+	while (temp->m_entry_number != 0)
+	{
+		temp = temp->m_next;
+	}
+	
 	for (int i = 0; i != ROB_SIZE; temp = temp->m_next, i++)
 	{
 		std::cout<<temp->m_entry_number<<"\t";
@@ -927,7 +939,7 @@ bool ROB::process_instructions(void)
 	//}
 	//std::cout<<std::endl;
 	
-	cycle_number++;
+	m_cycle_number++;
 	
 	return true;
 }
