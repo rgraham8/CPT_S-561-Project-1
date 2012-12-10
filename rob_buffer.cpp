@@ -818,7 +818,7 @@ void ROB::commit_instruction(void)
 ///////////////////////////////////////////////////////////////////////
 bool ROB::process_instructions(void)
 {	
-	std::cout<<"\n<-- Cyle #: "<<m_cycle_number+1<<" -->\n"<<std::endl;
+	std::cout<<"\n<-- Cycle #: "<<m_cycle_number+1<<" -->\n"<<std::endl;
 	
 	commit_instruction();
 	execute_intructions();

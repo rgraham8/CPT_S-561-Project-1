@@ -43,6 +43,7 @@ int main(int argc, char* argv[])
 		std::cout<<"Average Issues Per Cycle: "<<reorder_buffer.get_avg_num_of_issues()<<std::endl;
 		std::cout<<"Average Writes Per Cycle: "<<reorder_buffer.get_avg_num_of_writes()<<std::endl;
 		std::cout<<"Average Commits Per Cycle: "<<reorder_buffer.get_avg_num_of_commits()<<std::endl;
+		std::cout<<"CPI: "<<1/reorder_buffer.get_avg_num_of_commits()<<std::endl;
 	}
 	catch (std::runtime_error &e)
 	{
