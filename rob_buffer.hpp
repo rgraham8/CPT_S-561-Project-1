@@ -18,7 +18,7 @@
 #include <stdexcept>
 #include <cstdlib>
 #include <map>
-
+#include <algorithm>
 #include "rob_config.hpp"
 
 enum Instruction_Set
@@ -247,23 +247,26 @@ class ROB
 		
 		float get_avg_num_of_issues(void)
 		{
-			return average(m_num_of_issues_per_cycle);
+			int denom = last_issue_cycle_;
+			return average(m_num_of_issues_per_cycle, denom);
 			
 		}
 		
 		float get_avg_num_of_writes(void)
 		{
-			return average(m_num_of_writes_per_cycle);
+			int denom = (m_cycle_number + 1) - first_write_cycle_;
+			return average(m_num_of_writes_per_cycle, denom);
 		}
 		
 		float get_avg_num_of_commits(void)
 		{
-			return average(m_num_of_commits_per_cycle);
+			int denom = (m_cycle_number + 1) - first_write_cycle_;
+			return average(m_num_of_commits_per_cycle, denom);
 		}
 		
 	private:
 		
-		float average(std::vector<int>& list)
+		float average(std::vector<int>& list, int denominator)
 		{
 			float average = 0;
 			for (int i =0; i < list.size(); ++i)
@@ -271,7 +274,8 @@ class ROB
 				average += list[i];
 			}
 
-			average = average/static_cast<long>(list.size());
+			//average = average/static_cast<long>(list.size());
+			average /= denominator;
 			return average;
 		}
 		
@@ -319,7 +323,9 @@ class ROB
 		
 		std::vector<Instruction> m_instruction_queue;
 		std::vector<Instruction>::iterator instruction_ptr; ///< next instruction 
-															///< to be issued from queue
+			
+		int first_write_cycle_;
+		int last_issue_cycle_;												///< to be issued from queue
 		std::map<std::string, bool> branch_predictor;
 		bool m_flush_buffer;
 		ROB_Entry* m_branch_entry;

@@ -14,6 +14,7 @@ void ROB::process_reservation_station(Reservation_Station* rs, std::vector<Reser
 	{
 		rs->m_source_one = 
 			rs->m_waiting_rob_entry_value_one->m_value;
+		
 		rs->m_waiting_rob_entry_value_one = NULL;
 	}
 	if ((rs->m_waiting_rob_entry_value_two != NULL) &&
@@ -26,21 +27,20 @@ void ROB::process_reservation_station(Reservation_Station* rs, std::vector<Reser
 	if ((rs->m_waiting_rob_entry_value_one == NULL) && 
 		(rs->m_waiting_rob_entry_value_two == NULL))
 	{
-		if (rs->m_rob_entry->m_instruction->m_instruction == BNEZ)
-		{
-			if (rs->m_source_one == 0)
-			{
-				branch_predictor[rs->m_rob_entry->m_instruction->m_raw_instruction] = false;
-				m_flush_buffer = true;
-				m_branch_entry = rs->m_rob_entry;
-				//std::cout<<rs->m_rob_entry->m_instruction->m_raw_instruction<<std::endl;
-				//assert(false);
-			}
-		}
 		if (rs->m_execution_counter != 0)
 		{
 			rs->m_execution_counter--;
 			rs->m_rob_entry->m_state = EXECUTING;
+			
+			if (rs->m_rob_entry->m_instruction->m_instruction == BNEZ)
+			{
+				if (rs->m_source_one == 0)
+				{
+					branch_predictor[rs->m_rob_entry->m_instruction->m_raw_instruction] = false;
+					m_flush_buffer = true;
+					m_branch_entry = rs->m_rob_entry;
+				}
+			}
 		}
 		else // (rs->m_execution_counter == 0)
 		{
@@ -52,6 +52,7 @@ void ROB::process_reservation_station(Reservation_Station* rs, std::vector<Reser
 			rs->m_rob_entry->m_state = EXECUTION_COMPLETE;
 			
 			float* temp = NULL;
+			Register* temp_register;
 			
 			// Perform respective operation to get result
 			switch(rs->m_rob_entry->m_instruction->m_type)
@@ -63,6 +64,9 @@ void ROB::process_reservation_station(Reservation_Station* rs, std::vector<Reser
 						case ADD:
 						case ADDI:
 							rs->m_result = rs->m_source_one + rs->m_source_two;
+							//assert(false);
+							
+							//assert(false);
 							break;
 						case MULTIPLY:
 							rs->m_result = rs->m_source_one * rs->m_source_two;
@@ -73,7 +77,6 @@ void ROB::process_reservation_station(Reservation_Station* rs, std::vector<Reser
 						case SUBTRACT:
 						case SUBI:
 							rs->m_result = rs->m_source_one - rs->m_source_two;
-							//std::cout<<rs->m_source_one<<" - "<<rs->m_source_two<<std::endl;
 							break;	
 						case SLTI:
 							rs->m_result = (rs->m_source_one < rs->m_source_two) ? 1 : 0;
@@ -90,8 +93,12 @@ void ROB::process_reservation_station(Reservation_Station* rs, std::vector<Reser
 					break;
 					
 				case LOAD:
-
-					temp = m_memory + (int)(rs->m_source_one + rs->m_source_two);
+					//std::cout<<rs->m_rob_entry->m_instruction->m_raw_instruction;
+					//std::cout<<" "<<rs->m_source_one<<" "<<rs->m_source_two<<std::endl;
+					
+					temp = (m_memory + (int)rs->m_source_one + (int)(rs->m_source_one));
+					
+					//temp = &temp_register->m_data;
 					assert(temp <= &m_memory[MEMORY_SIZE_BYTES-1]);
 					
 					rs->m_result = *temp;
@@ -102,12 +109,9 @@ void ROB::process_reservation_station(Reservation_Station* rs, std::vector<Reser
 					break;
 					
 				case STORE:
-
-					temp = m_memory + (int)(rs->m_source_two + rs->m_rob_entry->m_instruction->m_load_store_offset);
-
+					temp = (m_memory + (int)rs->m_rob_entry->m_instruction->m_load_store_offset + (int)rs->m_source_two);
+					*temp = rs->m_source_two;
 					assert(temp <= &m_memory[MEMORY_SIZE_BYTES-1]);
-					
-					*temp = rs->m_source_one;
 					
 					break;
 					
@@ -120,6 +124,18 @@ void ROB::process_reservation_station(Reservation_Station* rs, std::vector<Reser
 	else if (!from_queue)
 	{
 		rs->m_rob_entry->m_state = WAITING;
+
+		if (rs->m_waiting_rob_entry_value_one != NULL)
+		{
+			assert(rs->m_rob_entry != rs->m_waiting_rob_entry_value_one);
+			std::cout<<rs->m_waiting_rob_entry_value_one->m_entry_number;
+		}
+		if (rs->m_waiting_rob_entry_value_two != NULL)
+		{
+			assert(rs->m_rob_entry != rs->m_waiting_rob_entry_value_two);
+		}
+		//assert(false);
+
 		waiting_units.push_back(rs);
 	}
 }
@@ -314,12 +330,24 @@ void ROB::execute_intructions(void)
 			// Write results
 			if ((rs->m_rob_entry->m_state == EXECUTION_COMPLETE))
 			{
+				if (rs->m_rob_entry->m_instruction->m_instruction == ADDI)
+				{
+					std::cout<<rs->m_rob_entry->m_instruction->m_raw_instruction<<std::endl;
+					assert(rs->m_rob_entry->m_busy == true);
+				}
+				
+				if(first_write_cycle_ < 0)
+				{
+					first_write_cycle_ = m_cycle_number;
+				}
+				
 				if (writing == m_max_num_issue)
 				{
 					continue;
 				}
 
 				writing++;
+				//std::cout<<"Writing: "<<rs->m_rob_entry->m_instruction->m_raw_instruction<<std::endl;
 				rs->m_rob_entry->m_value = rs->m_result;
 				rs->m_rob_entry->m_busy = false;
 				rs->m_rob_entry->m_state = COMMIT;
@@ -350,12 +378,15 @@ ROB::ROB(void)
 	m_head = NULL;
 	ROB_Entry* last;
 	ROB_Entry* new_node;
+	first_write_cycle_ = -1;
+	last_issue_cycle_ = 1;
 	
 	// Init Registers
+	m_int_register[0].m_data = 0;
 	m_int_register[1].m_data = 68;
 	m_int_register[2].m_data = 88;
 	m_int_register[3].m_data = 3;
-	
+
 	m_max_num_issue = 1;
 	m_flush_buffer = false;
 	m_cycle_number = 0;
@@ -466,7 +497,6 @@ ROB::ROB(void)
 					// Store memory offset for load/store
 					temp_instruction.m_load_store_offset = atoi(source1.c_str());
 					
-					destination;
 				}
 				else
 				{
@@ -634,7 +664,7 @@ ROB::ROB(void)
 					temp_instruction.m_source_register_one = 
 						m_int_register + atoi(source_register.c_str());
 				}
-				else if (source2[0] == 'F')
+				else if (source1[0] == 'F')
 				{
 					std::string source_register(source1.begin()+1, source1.end());
 					temp_instruction.m_source_register_one = 
@@ -726,6 +756,7 @@ void ROB::issue_instruction(void)
 		// Initialize entry parameters
 		m_tail->m_instruction = instruction_ptr;
 
+		
 		if (m_tail->m_instruction->m_instruction == BNEZ && 
 			branch_predictor[m_tail->m_instruction->m_raw_instruction])
 		{
@@ -741,6 +772,7 @@ void ROB::issue_instruction(void)
 			}
 			assert(it != m_instruction_queue.end());
 			assert(m_tail->m_state == EMPTY);
+			last_issue_cycle_ = m_cycle_number;
 			m_tail->m_state = ISSUE;
 		}
 		else
@@ -748,6 +780,7 @@ void ROB::issue_instruction(void)
 			instruction_ptr++;
 			assert(m_tail->m_state == EMPTY);
 			m_tail->m_state = ISSUE;
+			last_issue_cycle_ = m_cycle_number;
 		}
 		
 		if (m_tail->m_instruction->m_destination_register == NULL)
@@ -758,29 +791,22 @@ void ROB::issue_instruction(void)
 		else
 		{
 			m_tail->m_destination_register = m_tail->m_instruction->m_destination_register;
-			m_tail->m_destination_register->m_busy = true;
 		
 			// Store entry pointer in destination register
 			// so any following instruction issued knows to check this 
 			// entry for the result if/when it needs it
 			m_tail->m_destination_register->m_rob_entry = m_tail;
+			m_tail->m_destination_register->m_busy = true;
 		}
+		
+		// Set ROB entry to busy
+		m_tail->m_busy = true;
 		
 		// Point tail to next entry to be filled
 		m_tail = m_tail->m_next;
 
 		// Increment entry counter
 		rob_slot_counter++;
-	}
-	
-	// Stall if instruction was NOOP
-	if ((instruction_ptr->m_instruction == NOOP) &&
-		(instruction_ptr->m_type != LOAD) && 
-		(instruction_ptr->m_type != STORE) &&
-		(instruction_ptr != m_instruction_queue.end()))
-	{
-		instruction_ptr++;
-		std::cout<<"<- Stall due to NOOP ->"<<std::endl;
 	}
 	
 	m_num_of_issues_per_cycle.push_back(num_of_issued_instructions);
@@ -794,12 +820,18 @@ void ROB::commit_instruction(void)
 	{
 		if (m_head->m_state == COMMIT)
 		{
+			assert(m_head->m_busy == false);
 			if ((m_head->m_instruction->m_type != STORE) 
 				&& (m_head->m_instruction->m_type != BRANCH))
 			{
 				m_head->m_destination_register->m_data = m_head->m_value;
+				
+				if (m_head->m_destination_register->m_rob_entry == m_head)
+				{
+					m_head->m_destination_register->m_rob_entry = NULL;
+				}
 			}
-
+			
 			m_head->m_state = EMPTY;
 			rob_slot_counter--;
 			m_head = m_head->m_next;
@@ -827,6 +859,7 @@ bool ROB::process_instructions(void)
 	if (m_flush_buffer)
 	{
 		m_flush_buffer = false;
+		//assert(false);
 		
 		ROB_Entry* entry_to_remove = m_branch_entry->m_next;
 		
@@ -836,8 +869,7 @@ bool ROB::process_instructions(void)
 		}
 		
 		instruction_ptr = m_branch_entry->m_instruction+1;
-		//std::cout<<"X: "<<instruction_ptr->m_raw_instruction<<std::endl;
-		//assert(false);
+
 		while (entry_to_remove != m_head)
 		{	
 			bool done_removing = false;
@@ -864,13 +896,40 @@ bool ROB::process_instructions(void)
 				}
 			}
 			
+			
 			if (entry_to_remove->m_state != EMPTY)
 			{
+				if ((entry_to_remove->m_destination_register != NULL) &&
+					(entry_to_remove->m_destination_register->m_rob_entry == entry_to_remove))
+				{
+					//assert(false);
+					
+					Register* dest_register = entry_to_remove->m_destination_register;
+					entry_to_remove->m_destination_register = NULL;
+					dest_register->m_rob_entry = NULL;
+					
+					ROB_Entry* des_entry = m_head;
+					for (int i = 0; i != ROB_SIZE; des_entry = des_entry->m_next, i++)
+					{
+						if (des_entry->m_state == EMPTY)
+						{
+							break;
+						}
+						else if (des_entry->m_destination_register == dest_register)
+						{
+							dest_register->m_rob_entry = des_entry;
+						}
+					}
+					
+				}
 				entry_to_remove->m_state = EMPTY;
+				entry_to_remove->m_busy = false;
 				m_num_of_issues_per_cycle.back()--;
-				//std::cout<<"REMOVING: "<<entry_to_remove->m_instruction->m_raw_instruction<<std::endl;
+				std::cout<<"REMOVING: "<<entry_to_remove->m_instruction->m_raw_instruction<<std::endl;
 				rob_slot_counter--;
 			}
+			
+			
 			entry_to_remove = entry_to_remove->m_next;
 		}
 		//std::cout<<"FLUSHED"<<std::endl;
@@ -889,6 +948,9 @@ bool ROB::process_instructions(void)
 		temp = temp->m_next;
 	}
 	
+	std::cout<<"R1: "<<m_int_register[1].m_data<<std::endl;
+	std::cout<<"R3: "<<m_int_register[3].m_data<<std::endl;
+	std::cout<<"R5: "<<m_int_register[5].m_data<<std::endl;
 	for (int i = 0; i != ROB_SIZE; temp = temp->m_next, i++)
 	{
 		std::cout<<temp->m_entry_number<<"\t";
@@ -922,11 +984,11 @@ bool ROB::process_instructions(void)
 		if (temp->m_state != EMPTY)
 		{
 			std::cout<<temp->m_instruction->m_raw_instruction;
-			if ((temp->m_instruction->m_instruction == SLTI) ||
-				(temp->m_instruction->m_instruction == SUBI))
-			{
+			//if ((temp->m_instruction->m_instruction == SLTI) ||
+			//	(temp->m_instruction->m_instruction == SUBI))
+			//{
 				std::cout<<"\t"<<temp->m_value;
-			}
+			//}
 			std::cout<<std::endl;
 		}
 		else
