@@ -864,9 +864,13 @@ bool ROB::process_instructions(void)
 				}
 			}
 			
-			entry_to_remove->m_state = EMPTY;
-			//std::cout<<"REMOVING: "<<entry_to_remove->m_instruction->m_raw_instruction<<std::endl;
-			rob_slot_counter--;
+			if (entry_to_remove->m_state != EMPTY)
+			{
+				entry_to_remove->m_state = EMPTY;
+				m_num_of_issues_per_cycle.back()--;
+				//std::cout<<"REMOVING: "<<entry_to_remove->m_instruction->m_raw_instruction<<std::endl;
+				rob_slot_counter--;
+			}
 			entry_to_remove = entry_to_remove->m_next;
 		}
 		//std::cout<<"FLUSHED"<<std::endl;
@@ -941,6 +945,8 @@ bool ROB::process_instructions(void)
 	
 	m_cycle_number++;
 	
+	assert(m_num_of_issues_per_cycle.size() == m_num_of_writes_per_cycle.size());
+	assert(m_num_of_writes_per_cycle.size() == m_num_of_commits_per_cycle.size());
 	return true;
 }
 

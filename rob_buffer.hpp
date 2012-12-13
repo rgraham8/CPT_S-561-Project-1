@@ -271,7 +271,7 @@ class ROB
 				average += list[i];
 			}
 
-			average = average/static_cast<long>((m_cycle_number+1));
+			average = average/static_cast<long>(list.size());
 			return average;
 		}
 		
