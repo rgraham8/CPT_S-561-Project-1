@@ -314,6 +314,10 @@ void ROB::execute_intructions(void)
 			// Write results
 			if ((rs->m_rob_entry->m_state == EXECUTION_COMPLETE))
 			{
+			  if(first_write_cycle_ < 0) {
+			    first_write_cycle_ = m_cycle_number;
+			  }
+
 				if (writing == m_max_num_issue)
 				{
 					continue;
@@ -346,6 +350,7 @@ void ROB::execute_intructions(void)
 
 ///////////////////////////////////////////////////////////////////////
 ROB::ROB(void)
+  : first_write_cycle_(-1), last_issue_cycle_(1)
 {
 	m_head = NULL;
 	ROB_Entry* last;
@@ -742,12 +747,14 @@ void ROB::issue_instruction(void)
 			assert(it != m_instruction_queue.end());
 			assert(m_tail->m_state == EMPTY);
 			m_tail->m_state = ISSUE;
+			last_issue_cycle_ = m_cycle_number;
 		}
 		else
 		{
 			instruction_ptr++;
 			assert(m_tail->m_state == EMPTY);
 			m_tail->m_state = ISSUE;
+			last_issue_cycle_ = m_cycle_number;
 		}
 		
 		if (m_tail->m_instruction->m_destination_register == NULL)
