@@ -128,7 +128,7 @@ void ROB::process_reservation_station(Reservation_Station* rs, std::vector<Reser
 		if (rs->m_waiting_rob_entry_value_one != NULL)
 		{
 			assert(rs->m_rob_entry != rs->m_waiting_rob_entry_value_one);
-			std::cout<<rs->m_waiting_rob_entry_value_one->m_entry_number;
+			//std::cout<<rs->m_waiting_rob_entry_value_one->m_entry_number;
 		}
 		if (rs->m_waiting_rob_entry_value_two != NULL)
 		{
@@ -332,7 +332,7 @@ void ROB::execute_intructions(void)
 			{
 				if (rs->m_rob_entry->m_instruction->m_instruction == ADDI)
 				{
-					std::cout<<rs->m_rob_entry->m_instruction->m_raw_instruction<<std::endl;
+					//std::cout<<rs->m_rob_entry->m_instruction->m_raw_instruction<<std::endl;
 					assert(rs->m_rob_entry->m_busy == true);
 				}
 				
@@ -925,7 +925,7 @@ bool ROB::process_instructions(void)
 				entry_to_remove->m_state = EMPTY;
 				entry_to_remove->m_busy = false;
 				m_num_of_issues_per_cycle.back()--;
-				std::cout<<"REMOVING: "<<entry_to_remove->m_instruction->m_raw_instruction<<std::endl;
+				//std::cout<<"REMOVING: "<<entry_to_remove->m_instruction->m_raw_instruction<<std::endl;
 				rob_slot_counter--;
 			}
 			
@@ -950,7 +950,7 @@ bool ROB::process_instructions(void)
 	
 	std::cout<<"R1: "<<m_int_register[1].m_data<<std::endl;
 	std::cout<<"R3: "<<m_int_register[3].m_data<<std::endl;
-	std::cout<<"R5: "<<m_int_register[5].m_data<<std::endl;
+	std::cout<<"R5: "<<m_int_register[5].m_data<<std::endl<<std::endl;
 	for (int i = 0; i != ROB_SIZE; temp = temp->m_next, i++)
 	{
 		std::cout<<temp->m_entry_number<<"\t";
@@ -987,7 +987,7 @@ bool ROB::process_instructions(void)
 			//if ((temp->m_instruction->m_instruction == SLTI) ||
 			//	(temp->m_instruction->m_instruction == SUBI))
 			//{
-				std::cout<<"\t"<<temp->m_value;
+			//	std::cout<<"\t"<<temp->m_value;
 			//}
 			std::cout<<std::endl;
 		}
